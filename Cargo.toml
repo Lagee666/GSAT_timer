@@ -1,0 +1,11 @@
+[package]
+name = "GSAT_timer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4.9"
+actix-files = "0.6"
+chrono = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0.104", features = ["preserve_order"] }

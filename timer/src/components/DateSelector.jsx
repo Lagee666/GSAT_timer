@@ -16,7 +16,7 @@ function DateSelector() {
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-100">
       <div className="p-6 bg-white rounded-lg shadow-lg flex flex-col items-center">
-        <h1 className="text-2xl mb-4">選擇日期</h1>
+        <h1 className="text-2xl mb-4">出生日期</h1>
         <DatePicker
           selected={selectedDate}
           onChange={(date) => setSelectedDate(date)}
@@ -30,7 +30,7 @@ function DateSelector() {
           disabled={!selectedDate}
           className="mt-4 bg-blue-500 text-white p-2 rounded w-64 disabled:bg-gray-400"
         >
-          确定
+          確定
         </button>
       </div>
     </div>

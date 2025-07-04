@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from "react-router-dom";
 
 function DateSelector() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -21,9 +21,11 @@ function DateSelector() {
           selected={selectedDate}
           onChange={(date) => setSelectedDate(date)}
           dateFormat="yyyy/MM/dd"
-          minDate={new Date('1970-01-01')}
+          minDate={new Date("1970-01-01")}
           className="p-2 border rounded w-64 text-center"
           placeholderText="年/月/日"
+          showYearDropdown // 啟用年份下拉選單
+          showMonthDropdown // 啟用月份下拉選單
         />
         <button
           onClick={handleConfirm}

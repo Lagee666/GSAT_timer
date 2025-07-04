@@ -1,11 +1,9 @@
 export function calculateTimeLeft(bornDate) {
-  const start = new Date('2030-01-01T00:00:00');
   const now = new Date();
   const gsatDate = getGSATSaturday(bornDate);
   const diff =  gsatDate - now;
 
-  console.log("gsatDate:", gsatDate);
-  console.log("diff:", diff);
+
   // Check if date is a valid date
   if (isNaN(gsatDate.getTime()) || now > gsatDate  || diff <= 0) {
     return { days: 0, hours: 0, minutes: 0, seconds: 0, isEnded: true };
@@ -63,5 +61,3 @@ function getDateDifference(inputDate) {
 // 示例
 const date1 = new Date('2025-09-01');
 const date2 = new Date('2025-08-31');
-console.log(getDateDifference(date1)); // 9/1 後，加 18 年
-console.log(getDateDifference(date2)); // 9/1 前，加 17 年

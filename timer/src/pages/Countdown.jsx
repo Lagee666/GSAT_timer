@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import CountdownDisplay from '../components/CountdownDisplay';
@@ -7,46 +7,154 @@ import { calculateTimeLeft } from '../utils/calculateTimeLeft';
 function Countdown() {
   const location = useLocation();
   const dateParam = new URLSearchParams(location.search).get('date');
-  
-  // 检查日期是否有效
+
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+  });
+
+  // 檢查日期是否有效
   if (!dateParam) {
-    return <div className="min-h-screen bg-gray-900 text-white flex justify-center items-center">無效日期</div>;
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex justify-center items-center">
+        無效日期
+      </div>
+    );
   }
 
   const targetDate = new Date(dateParam);
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(targetDate));
 
+  // 監聽視窗大小變化
   useEffect(() => {
-    // 每秒更新倒计时
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // 每秒更新倒計時
+  useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft(targetDate));
     }, 1000);
 
-    // 清理定时器
     return () => clearInterval(timer);
   }, [targetDate]);
 
-  const floatingWords = ['測試', '計時', 'Countdown'];
+  const floatingWords = ['test1', 'test2', 'test3'];
+
+  // 使用 useMemo 儲存初始位置和速度，確保分佈均勻
+  const wordPositions = useMemo(() => {
+    if (windowSize.width === 0 || windowSize.height === 0) {
+      return floatingWords.map(() => ({
+        x: 0,
+        y: 0,
+        speedX: (Math.random() - 0.5) * 100,
+        speedY: (Math.random() - 0.5) * 100,
+      }));
+    }
+
+    return floatingWords.map((_, index) => {
+      const maxWidth = 100; // 假設文字最大寬度
+      const maxHeight = 50; // 假設文字最大高度
+      // 均勻分佈初始位置，避免堆積
+      const gridSize = Math.ceil(Math.sqrt(floatingWords.length));
+      const row = Math.floor(index / gridSize);
+      const col = index % gridSize;
+      return {
+        x: (col + Math.random()) * (windowSize.width - maxWidth) / gridSize,
+        y: (row + Math.random()) * (windowSize.height - maxHeight) / gridSize,
+        speedX: (Math.random() - 0.5) * 100,
+        speedY: (Math.random() - 0.5) * 100,
+      };
+    });
+  }, [windowSize]);
+
+  // 儲存 DOM 元素的參考
+  const wordRefs = useRef(floatingWords.map(() => null));
+
+  // 自定義動畫循環
+  useEffect(() => {
+    let animationFrameId;
+
+    const updatePositions = () => {
+      wordPositions.forEach((pos, index) => {
+        const element = wordRefs.current[index];
+        if (!element) return;
+
+        const rect = element.getBoundingClientRect();
+        const deltaTime = 1 / 60; // 假設 60 FPS
+        let newX = pos.x + pos.speedX * deltaTime;
+        let newY = pos.y + pos.speedY * deltaTime;
+
+        // 邊界檢查，基於文字左上角
+        if (newX <= 0) {
+          newX = 0;
+          pos.speedX = -pos.speedX;
+        } else if (newX + rect.width >= windowSize.width) {
+          newX = windowSize.width - rect.width;
+          pos.speedX = -pos.speedX;
+        }
+
+        if (newY <= 0) {
+          newY = 0;
+          pos.speedY = -pos.speedY;
+        } else if (newY + rect.height >= windowSize.height) {
+          newY = windowSize.height - rect.height;
+          pos.speedY = -pos.speedY;
+        }
+
+        pos.x = newX;
+        pos.y = newY;
+
+        // 更新位置，基於左上角
+        element.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+
+        // 調試日誌，確認位置和尺寸
+        // console.log(`Word ${index}: x=${newX}, y=${newY}, width=${rect.width}, height=${rect.height}`);
+      });
+
+      animationFrameId = requestAnimationFrame(updatePositions);
+    };
+
+    if (windowSize.width > 0 && windowSize.height > 0) {
+      animationFrameId = requestAnimationFrame(updatePositions);
+    }
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [windowSize, wordPositions]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex justify-center items-center relative overflow-hidden">
-      {timeLeft.isEnded ? (
-        <div className="text-center">
-          <h1 className="text-4xl mb-4">計時結束</h1>
-        </div>
-      ) : (
-        <CountdownDisplay timeLeft={timeLeft} />
-      )}
+    <div className="min-h-screen bg-gray-900 text-white relative">
+      <div className="absolute inset-0 flex justify-center items-center z-10">
+        {timeLeft.isEnded ? (
+          <div className="text-center">
+            <h1 className="text-4xl mb-4">計時結束</h1>
+          </div>
+        ) : (
+          <CountdownDisplay timeLeft={timeLeft} />
+        )}
+      </div>
       {floatingWords.map((word, index) => (
         <motion.div
           key={index}
-          className="absolute text-gray-400 text-2xl opacity-50"
-          initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
-          animate={{
-            x: [Math.random() * 100, Math.random() * -100, Math.random() * 100],
-            y: [Math.random() * 50, Math.random() * -50, Math.random() * 50],
+          className="absolute text-gray-400 text-2xl opacity-50 pointer-events-none"
+          style={{
+            maxWidth: 'max-content',
+            transform: `translate(${wordPositions[index].x}px, ${wordPositions[index].y}px)`,
+            transformOrigin: 'top left',
+            left: 0,
+            top: 0,
           }}
-          transition={{ repeat: Infinity, duration: 5 + Math.random() * 5 }}
+          ref={(el) => (wordRefs.current[index] = el)}
         >
           {word}
         </motion.div>

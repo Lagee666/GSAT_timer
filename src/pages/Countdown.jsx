@@ -53,19 +53,24 @@ function Countdown() {
   if (timeLeft.isEnded) {
     floatingWords = [
       "要不要準備重考?",
-      "考這甚麼成績，你對得起我嗎",
+      "考這甚麼成績",
       "辛苦供你上學就為了考成這樣?",
       "趕快去找補習班準備重考",
-      "在這邊浪費我的錢不如趕快去工作賺錢",
-      "怎麼在休息?指考快開始了不知道?",
+      "在這邊浪費我的錢",
+      "不如趕快去工作賺錢",
+      "怎麼在休息?",
+      "指考快開始了不知道?",
     ];
   } else {
     floatingWords = [
-      "學測都快到了，還不讀書?",
-      "隔壁家3歲就開始準備學測，你呢?",
-      "你有意識到距離學測還有多久嗎? 還在玩?",
+      "學測都快到了",
+      "還不讀書?",
+      "隔壁家3歲就開始準備學測",
+      "你有意識到距離學測還有多久嗎?",
+      "還在玩?",
       "要不開始準備重考?",
       "現在不讀書，以後有得是後悔",
+      "才幾點就在休息?",
     ];
   }
   // 使用 useMemo 儲存初始位置和速度，確保分佈均勻
@@ -149,8 +154,20 @@ function Countdown() {
     return () => cancelAnimationFrame(animationFrameId);
   }, [windowSize, wordPositions]);
 
+  const handleGoHome = () => {
+    if (selectedDate) {
+      navigate(`/`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white relative">
+      <button
+        onClick={handleGoHome} // 調用新的函數
+        className="absolute top-4 left-4 p-1 bg-gray-800 text-gray-500 rounded-lg shadow-md hover:bg-gray-300 transition-colors duration-200 z-30"
+      >
+        &lt; Back{/* 按鈕文字也相應修改 */}
+      </button>
       <div className="absolute inset-0 flex justify-center items-center z-10">
         {timeLeft.isEnded ? (
           <div className="text-center">

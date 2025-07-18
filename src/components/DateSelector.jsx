@@ -9,7 +9,7 @@ function DateSelector() {
 
   const handleConfirm = () => {
     if (selectedDate) {
-      navigate(`/countdown?date=${selectedDate.toISOString()}`);
+      navigate(`/countdown?date=${selectedDate.toISOString().split("T")[0]}`);
     }
   };
 
@@ -21,11 +21,12 @@ function DateSelector() {
           selected={selectedDate}
           onChange={(date) => setSelectedDate(date)}
           dateFormat="yyyy/MM/dd"
-          minDate={new Date("1970-01-01")}
           className="p-2 border rounded w-64 text-center"
           placeholderText="年/月/日"
-          showYearDropdown // 啟用年份下拉選單
           showMonthDropdown // 啟用月份下拉選單
+          showYearDropdown // 啟用年份下拉選單
+          scrollableYearDropdown // 啟用年份下拉選單的滾動效果
+          yearDropdownItemNumber={100}
         />
         <button
           onClick={handleConfirm}

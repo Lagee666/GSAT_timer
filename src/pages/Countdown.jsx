@@ -1,16 +1,16 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import CountdownDisplay from '../components/CountdownDisplay';
-import { calculateTimeLeft } from '../utils/calculateTimeLeft';
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import CountdownDisplay from "../components/CountdownDisplay";
+import { calculateTimeLeft } from "../utils/calculateTimeLeft";
 
 function Countdown() {
   const location = useLocation();
-  const dateParam = new URLSearchParams(location.search).get('date');
+  const dateParam = new URLSearchParams(location.search).get("date");
 
   const [windowSize, setWindowSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
 
   // 檢查日期是否有效
@@ -34,10 +34,10 @@ function Countdown() {
       });
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     handleResize();
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // 每秒更新倒計時
@@ -49,9 +49,25 @@ function Countdown() {
     return () => clearInterval(timer);
   }, [targetDate]);
 
-  // const floatingWords = ['test1', 'test2', 'test3'];
-  const floatingWords = ['學測都快到了，還不讀書?', '隔壁家3歲就開始準備學測，你呢?', '你有意識到距離學測還有多久嗎? 還在玩?', '要不開始準備重考?', '現在不讀書，以後有得是後悔'];
-
+  let floatingWords;
+  if (timeLeft.isEnded) {
+    floatingWords = [
+      "要不要準備重考?",
+      "考這甚麼成績，你對得起我嗎",
+      "辛苦供你上學就為了考成這樣?",
+      "趕快去找補習班準備重考",
+      "在這邊浪費我的錢不如趕快去工作賺錢",
+      "怎麼在休息?指考快開始了不知道?",
+    ];
+  } else {
+    floatingWords = [
+      "學測都快到了，還不讀書?",
+      "隔壁家3歲就開始準備學測，你呢?",
+      "你有意識到距離學測還有多久嗎? 還在玩?",
+      "要不開始準備重考?",
+      "現在不讀書，以後有得是後悔",
+    ];
+  }
   // 使用 useMemo 儲存初始位置和速度，確保分佈均勻
   const wordPositions = useMemo(() => {
     if (windowSize.width === 0 || windowSize.height === 0) {
@@ -71,8 +87,8 @@ function Countdown() {
       const row = Math.floor(index / gridSize);
       const col = index % gridSize;
       return {
-        x: (col + Math.random()) * (windowSize.width - maxWidth) / gridSize,
-        y: (row + Math.random()) * (windowSize.height - maxHeight) / gridSize,
+        x: ((col + Math.random()) * (windowSize.width - maxWidth)) / gridSize,
+        y: ((row + Math.random()) * (windowSize.height - maxHeight)) / gridSize,
         speedX: (Math.random() - 0.1) * 100,
         speedY: (Math.random() - 0.1) * 100,
       };
@@ -138,7 +154,7 @@ function Countdown() {
       <div className="absolute inset-0 flex justify-center items-center z-10">
         {timeLeft.isEnded ? (
           <div className="text-center">
-            <h1 className="text-4xl mb-4">要不再考一次?</h1>
+            <h1 className="text-4xl mb-4">恭喜考完</h1>
           </div>
         ) : (
           <CountdownDisplay timeLeft={timeLeft} />
@@ -149,9 +165,9 @@ function Countdown() {
           key={index}
           className="absolute text-gray-400 text-2xl opacity-50 pointer-events-none"
           style={{
-            maxWidth: 'max-content',
+            maxWidth: "max-content",
             transform: `translate(${wordPositions[index].x}px, ${wordPositions[index].y}px)`,
-            transformOrigin: 'top left',
+            transformOrigin: "top left",
             left: 0,
             top: 0,
           }}
@@ -160,6 +176,9 @@ function Countdown() {
           {word}
         </motion.div>
       ))}
+      <div className="absolute bottom-0 right-0 p-4 text-gray-700 text-sm z-20">
+        預設一月倒數第二個星期六
+      </div>
     </div>
   );
 }
